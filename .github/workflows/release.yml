@@ -20,6 +20,9 @@ jobs:
     name: Release to Test PyPI
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.event.pull_request.state == 'open'
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -99,6 +102,9 @@ jobs:
     name: Release to Production PyPI
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
