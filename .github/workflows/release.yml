@@ -68,11 +68,10 @@ jobs:
 
       - name: Publish to Test PyPI
         if: steps.check_version.outputs.version_changed == 'true'
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository-url: https://test.pypi.org/legacy/
-          skip-existing: true
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        run: twine upload dist/*
 
       - name: Comment on PR
         if: steps.check_version.outputs.version_changed == 'true'
@@ -149,10 +148,10 @@ jobs:
 
       - name: Publish to Production PyPI
         if: steps.check_version.outputs.version_changed == 'true'
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          skip-existing: true
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*
 
       - name: Create Release
         if: steps.check_version.outputs.version_changed == 'true'
