@@ -12,6 +12,8 @@ Changelog](http://keepachangelog.com/).
 
 ### Fixes
 
+* **Schema inspection** - Ignore temporary schemas ending with _next or _NEXT to prevent intermittent errors when schemas disappear during execution. ([GEM-5](https://linear.app/gemma-analytics/issue/GEM-5), [#11](https://github.com/Gemma-Analytics/permifrost/pull/11))
+
 ### Changes
 
 ## 0.15.4 - (2023-12-04)
