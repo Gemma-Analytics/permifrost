@@ -6,7 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Permifrost is a Python CLI tool that manages Snowflake database permissions declaratively. Given a YAML spec file describing the desired permission state (roles, users, databases, warehouses, schemas), it connects to Snowflake and generates/executes the necessary `GRANT` and `REVOKE` SQL statements to match the spec.
 
-**This is a fork by Gemma Analytics** of the original Permifrost project maintained by GitLab Data. The upstream source is at [https://gitlab.com/gitlab-data/permifrost](https://gitlab.com/gitlab-data/permifrost). Gemma Analytics maintains this fork as `gemma.permifrost` on PyPI for use with [tundri](https://github.com/Gemma-Analytics/tundri) — a custom tool that handles CREATE/DROP/ALTER DDL operations on Snowflake objects and then delegates permission grants to Permifrost.
+**This is a fork by Gemma Analytics** of the original Permifrost project maintained by GitLab Data. The upstream source is at [https://gitlab.com/gitlab-data/permifrost](https://gitlab.com/gitlab-data/permifrost). Gemma Analytics maintains this fork as `gemma.permifrost` on PyPI.
+
+**Gemma's fork is primarily used via [Tundri](https://github.com/Gemma-Analytics/tundri/tree/main/tundri)** — a custom wrapper tool that handles `CREATE`, `DROP`, and `ALTER` DDL operations on Snowflake objects before delegating permission grants to Permifrost. When working with Snowflake access control at Gemma, you are most likely working through Tundri rather than invoking Permifrost directly.
 
 ## Development Commands
 
