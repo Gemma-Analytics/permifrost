@@ -13,6 +13,7 @@ Changelog](http://keepachangelog.com/).
 ### Fixes
 
 ### Changes
+- **Add CLAUDE.md** - Added project guide for Claude Code contributors documenting fork origin (upstream: https://gitlab.com/gitlab-data/permifrost), architecture, development commands, and Tundri integration. ([GEM-6](https://linear.app/gemma-analytics/issue/GEM-6/permifrost-repo-lacks-claudemd), [#14](https://github.com/Gemma-Analytics/permifrost/pull/14))
 
 ## 0.15.4 - (2023-12-04)
 * Moves built in docker version to 3.10.3 as well as updating some python libraries. 
