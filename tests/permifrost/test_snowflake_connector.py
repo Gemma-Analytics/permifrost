@@ -208,7 +208,7 @@ class TestSnowflakeConnector:
         )
         assert role == "test_role"
 
-    def test_show_schemas(self, mocker):
+    def test_show_schemas(self, mocker, snowflake_connector_env):
         mocker.patch("sqlalchemy.create_engine")
         conn = SnowflakeConnector()
         conn.run_query = mocker.MagicMock()
@@ -231,6 +231,35 @@ class TestSnowflakeConnector:
             "database_1.schema_1",
             'database_1."45_SCHEMA"',
             'database_1."CaseSensitiveSchema"',
+        ]
+
+    def test_show_schemas_filters_next_suffix(
+        self, mocker, snowflake_connector_env
+    ):
+        mocker.patch("sqlalchemy.create_engine")
+        conn = SnowflakeConnector()
+        conn.run_query = mocker.MagicMock()
+        mocker.patch.object(
+            conn.run_query(),
+            "fetchall",
+            return_value=[
+                {"database_name": "DATABASE_1", "name": "SCHEMA_1"},
+                {"database_name": "DATABASE_1", "name": "SCHEMA_1_next"},
+                {"database_name": "DATABASE_1", "name": "SCHEMA_2_NEXT"},
+                {"database_name": "DATABASE_1", "name": "SCHEMA_3_Next"},
+                {"database_name": "DATABASE_1", "name": "SCHEMA_4"},
+            ],
+        )
+
+        schemas = conn.show_schemas("database_1")
+
+        conn.run_query.assert_has_calls(
+            [mocker.call("SHOW TERSE SCHEMAS IN DATABASE database_1")]
+        )
+        # Should filter out schemas ending with _next, _NEXT, or _Next (case-insensitive)
+        assert schemas == [
+            "database_1.schema_1",
+            "database_1.schema_4",
         ]
 
     def test_show_tables(self, mocker):

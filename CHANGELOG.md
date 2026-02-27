@@ -12,6 +12,8 @@ Changelog](http://keepachangelog.com/).
 
 ### Fixes
 
+* **Schema inspection** - Ignore temporary schemas ending with _next or _NEXT to prevent intermittent errors when schemas disappear during execution. ([GEM-5](https://linear.app/gemma-analytics/issue/GEM-5), [#11](https://github.com/Gemma-Analytics/permifrost/pull/11))
+
 ### Changes
 - **Add CLAUDE.md** - Added project guide for Claude Code contributors documenting fork origin (upstream: https://gitlab.com/gitlab-data/permifrost), architecture, development commands, and Tundri integration. ([GEM-6](https://linear.app/gemma-analytics/issue/GEM-6/permifrost-repo-lacks-claudemd), [#14](https://github.com/Gemma-Analytics/permifrost/pull/14))
 
