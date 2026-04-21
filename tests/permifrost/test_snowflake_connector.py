@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import pytest
 import sqlalchemy
@@ -91,7 +92,9 @@ class TestSnowflakeConnector:
             == 'database_1."1_LEADING_DIGIT".<table>'
         )
 
-        with pytest.warns(SyntaxWarning):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            # These identifiers have periods in them but should not raise SyntaxWarning anymore
             SnowflakeConnector.snowflaky(db16)
             SnowflakeConnector.snowflaky(db17)
 
