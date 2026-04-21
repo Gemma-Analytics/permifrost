@@ -33,20 +33,19 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Update VERSION file
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          echo "${{ inputs.version }}" > VERSION
-          echo "Updated VERSION to ${{ inputs.version }}"
+          echo "$VERSION" > VERSION
+          echo "Updated VERSION to $VERSION"
 
       - name: Update version in files
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          # Update .bumpversion.cfg
-          sed -i "s/current_version = .*/current_version = ${{ inputs.version }}/" .bumpversion.cfg
-          
-          # Update src/permifrost/__init__.py
-          sed -i "s/__version__ = \".*\"/__version__ = \"${{ inputs.version }}\"/" src/permifrost/__init__.py
-          
-          # Update pyproject.toml
-          sed -i "s/version = \".*\"/version = \"${{ inputs.version }}\"/" pyproject.toml
+          sed -i "s/current_version = .*/current_version = $VERSION/" .bumpversion.cfg
+          sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" src/permifrost/__init__.py
+          sed -i "s/version = \".*\"/version = \"$VERSION\"/" pyproject.toml
 
       - name: Install build dependencies
         run: |
@@ -74,6 +73,16 @@ jobs:
           password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
 
+      - name: Commit version changes
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add VERSION .bumpversion.cfg src/permifrost/__init__.py pyproject.toml
+          git commit -m "Bump version to $VERSION"
+          git push origin HEAD
+
       - name: Create Release
         if: inputs.target == 'production'
         uses: actions/create-release@v1
@@ -84,36 +93,29 @@ jobs:
           release_name: Release v${{ inputs.version }}
           body: |
             ## Release v${{ inputs.version }}
-            
+
             This release has been manually published to PyPI.
-            
+
             **Install:**
             ```bash
             pip install gemma.permifrost
             ```
-            
+
             **PyPI URL:** https://pypi.org/project/gemma.permifrost/
           draft: false
           prerelease: false
 
-      - name: Commit version changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add VERSION .bumpversion.cfg src/permifrost/__init__.py pyproject.toml
-          git commit -m "Bump version to ${{ inputs.version }}"
-          git tag v${{ inputs.version }}
-          git push origin HEAD
-          git push origin v${{ inputs.version }}
-
       - name: Success message
+        env:
+          VERSION: ${{ inputs.version }}
+          TARGET: ${{ inputs.target }}
         run: |
-          if [ "${{ inputs.target }}" = "test" ]; then
-            echo "✅ Successfully published version ${{ inputs.version }} to Test PyPI"
-            echo "🔗 Test PyPI URL: https://test.pypi.org/project/gemma.permifrost/"
-            echo "📦 Install: pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ gemma.permifrost"
+          if [ "$TARGET" = "test" ]; then
+            echo "Successfully published version $VERSION to Test PyPI"
+            echo "Test PyPI URL: https://test.pypi.org/project/gemma.permifrost/"
+            echo "Install: pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ gemma.permifrost"
           else
-            echo "✅ Successfully published version ${{ inputs.version }} to Production PyPI"
-            echo "🔗 PyPI URL: https://pypi.org/project/gemma.permifrost/"
-            echo "📦 Install: pip install gemma.permifrost"
+            echo "Successfully published version $VERSION to Production PyPI"
+            echo "PyPI URL: https://pypi.org/project/gemma.permifrost/"
+            echo "Install: pip install gemma.permifrost"
           fi
