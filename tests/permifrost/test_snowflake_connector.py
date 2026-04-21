@@ -1,4 +1,6 @@
+import logging
 import os
+import warnings
 
 import pytest
 import sqlalchemy
@@ -91,7 +93,9 @@ class TestSnowflakeConnector:
             == 'database_1."1_LEADING_DIGIT".<table>'
         )
 
-        with pytest.warns(SyntaxWarning):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            # These identifiers have periods in them but should not raise SyntaxWarning anymore
             SnowflakeConnector.snowflaky(db16)
             SnowflakeConnector.snowflaky(db17)
 
@@ -100,6 +104,17 @@ class TestSnowflakeConnector:
         )
 
         assert SnowflakeConnector.snowflaky(db19) == ""
+
+    def test_snowflaky_logs_debug_for_period_in_identifier(self, caplog):
+        with caplog.at_level(logging.DEBUG, logger="permifrost.logger"):
+            SnowflakeConnector.snowflaky(
+                'RAW_RESTRICTED.airbyte_internal."AIRBYTE_SFTP_raw__stream_2025-03-23.csv"'
+            )
+        assert any(
+            "contains additional periods" in r.message
+            for r in caplog.records
+            if r.levelno == logging.DEBUG
+        )
 
     def test_uses_oauth_if_available(self, mocker, snowflake_connector_env):
         mocker.patch("sqlalchemy.create_engine")
