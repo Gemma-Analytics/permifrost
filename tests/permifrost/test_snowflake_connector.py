@@ -1,3 +1,4 @@
+import logging
 import os
 import warnings
 
@@ -103,6 +104,17 @@ class TestSnowflakeConnector:
         )
 
         assert SnowflakeConnector.snowflaky(db19) == ""
+
+    def test_snowflaky_logs_debug_for_period_in_identifier(self, caplog):
+        with caplog.at_level(logging.DEBUG, logger="permifrost.logger"):
+            SnowflakeConnector.snowflaky(
+                'RAW_RESTRICTED.airbyte_internal."AIRBYTE_SFTP_raw__stream_2025-03-23.csv"'
+            )
+        assert any(
+            "contains additional periods" in r.message
+            for r in caplog.records
+            if r.levelno == logging.DEBUG
+        )
 
     def test_uses_oauth_if_available(self, mocker, snowflake_connector_env):
         mocker.patch("sqlalchemy.create_engine")
