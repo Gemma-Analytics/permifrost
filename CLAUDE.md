@@ -23,7 +23,7 @@ make initial-setup
 make test
 
 # Run tests locally (inside Docker shell or with dev install)
-pytest -x -v --disable-pytest-warnings
+uv run pytest -x -v --disable-pytest-warnings
 
 # Type checking
 make typecheck
@@ -127,6 +127,23 @@ Permifrost requires the `SECURITYADMIN` role and will fail validation if a diffe
 - Pre-commit hooks run on `pre-commit` and `pre-push` stages
 - Do **not** use forward slashes in branch names (CI limitation from upstream)
 - Never commit directly to `main` — always create a feature branch and open a PR
+
+## Development Workflow (AI-Assisted)
+
+The **Superpowers plugin** is required. Install it in Claude Code before starting work on this repo.
+
+### Feature development
+
+Follow red/green TDD for every change:
+
+1. **Red** — update or write a test asserting the desired behaviour; confirm it fails
+2. **Green** — make the minimal source change to pass the test
+3. **Verify** — `uv run pytest -x --disable-pytest-warnings` (240 tests, ~2s)
+4. **Commit** on a feature branch, open a PR
+
+For non-trivial features, write a plan first with `superpowers:writing-plans`, save it to
+`docs/superpowers/plans/YYYY-MM-DD-<feature>.md`, then execute with
+`superpowers:subagent-driven-development`.
 
 ## Releasing
 
