@@ -272,6 +272,15 @@ class SnowflakeConnector:
         results = self.run_query(query).fetchall()
 
         for result in results:
+            # Only consider actual role grants. Modern Snowflake auto-creates a
+            # per-user database (USER$<NAME>, from Snowsight Workspaces) for any
+            # user who has used the UI, and SHOW GRANTS TO USER then returns
+            # privilege rows (e.g. USAGE / CREATE SCHEMA / OWNERSHIP on
+            # USER$<NAME> objects) alongside the real ROLE grants. Those
+            # privilege rows have an empty "role" column, which would otherwise
+            # produce invalid "REVOKE ROLE  FROM user ..." SQL downstream.
+            if result["granted_on"] != "ROLE":
+                continue
             roles.append(SnowflakeConnector.snowflaky(result["role"]))
 
         return roles

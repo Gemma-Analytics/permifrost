@@ -277,6 +277,56 @@ class TestSnowflakeConnector:
             "database_1.schema_4",
         ]
 
+    def test_show_roles_granted_to_user_ignores_non_role_grants(
+        self, mocker, snowflake_connector_env
+    ):
+        # Modern Snowflake auto-creates a per-user database (USER$<NAME>, from
+        # Snowsight Workspaces). SHOW GRANTS TO USER then returns privilege rows
+        # on those objects (with an empty "role" column) alongside the real ROLE
+        # grants. Those privilege rows must be filtered out, otherwise the empty
+        # role name produces invalid "REVOKE ROLE  FROM user ..." SQL downstream.
+        mocker.patch("sqlalchemy.create_engine")
+        conn = SnowflakeConnector()
+        conn.run_query = mocker.MagicMock()
+        mocker.patch.object(
+            conn.run_query(),
+            "fetchall",
+            return_value=[
+                {
+                    "granted_on": "ROLE",
+                    "role": "ACCOUNTADMIN",
+                    "grantee_name": "TEST_USER",
+                },
+                {
+                    "granted_on": "DATABASE",
+                    "role": "",
+                    "name": "USER$TEST_USER",
+                    "grantee_name": "TEST_USER",
+                },
+                {
+                    "granted_on": "SCHEMA",
+                    "role": "",
+                    "name": "USER$TEST_USER.PUBLIC",
+                    "grantee_name": "TEST_USER",
+                },
+                {
+                    "granted_on": "WORKSPACE",
+                    "role": "",
+                    "name": "USER$TEST_USER.PUBLIC.DEFAULT$",
+                    "grantee_name": "TEST_USER",
+                },
+            ],
+        )
+
+        roles = conn.show_roles_granted_to_user("test_user")
+
+        conn.run_query.assert_has_calls(
+            [mocker.call("SHOW GRANTS TO USER test_user")]
+        )
+        # Only the actual ROLE grant is returned; the per-user database
+        # privilege rows are ignored.
+        assert roles == ["accountadmin"]
+
     def test_show_tables(self, mocker):
         mocker.patch("sqlalchemy.create_engine")
         conn = SnowflakeConnector()
@@ -499,7 +549,7 @@ class TestSnowflakeConnector:
         assert roles['"ROLE WITH SPACES"'] == "superadmin"
         assert roles['"lowercase role with spaces"'] == "superadmin"
 
-    def test_show_roles_granted_to_user(self, mocker):
+    def test_show_roles_granted_to_user(self, mocker, snowflake_connector_env):
         mocker.patch("sqlalchemy.create_engine")
         conn = SnowflakeConnector()
         conn.run_query = mocker.MagicMock()
@@ -507,10 +557,10 @@ class TestSnowflakeConnector:
             conn.run_query(),
             "fetchall",
             return_value=[
-                {"role": "TEST_ROLE"},
-                {"role": "SUPERADMIN"},
-                {"role": "ROLE WITH SPACES"},
-                {"role": "lowercase role with spaces"},
+                {"granted_on": "ROLE", "role": "TEST_ROLE"},
+                {"granted_on": "ROLE", "role": "SUPERADMIN"},
+                {"granted_on": "ROLE", "role": "ROLE WITH SPACES"},
+                {"granted_on": "ROLE", "role": "lowercase role with spaces"},
             ],
         )
 
