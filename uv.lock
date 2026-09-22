@@ -1424,7 +1424,7 @@ requires-dist = [
     { name = "pyyaml" },
     { name = "snowflake-connector-python", extras = ["secure-local-storage"] },
     { name = "snowflake-sqlalchemy", specifier = ">=1.7,<2" },
-    { name = "sqlalchemy" },
+    { name = "sqlalchemy", specifier = ">=1.4,<2" },
     { name = "twine", marker = "extra == 'dev'" },
     { name = "types-pyyaml", marker = "extra == 'dev'" },
 ]

@@ -16,7 +16,7 @@ requires = [
     "pyyaml",
     "snowflake-connector-python[secure-local-storage]",
     "snowflake-sqlalchemy>=1.7,<2",
-    "sqlalchemy",
+    "sqlalchemy>=1.4,<2",
 ]
 
 dev_requires = [
