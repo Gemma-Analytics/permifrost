@@ -12,6 +12,8 @@ Changelog](http://keepachangelog.com/).
 
 ### Fixes
 
+* **Snowflake connector 4** - The `snowflake-sqlalchemy` pin becomes a range (`>=1.7,<2`), which lifts the implicit `snowflake-connector-python<4` cap. Snowflake's Trust Center flags connections from connector 3.x as an outdated client.
+
 * **User role reconciliation** - `SHOW GRANTS TO USER` now filters to `granted_on == 'ROLE'` rows. Modern Snowflake auto-creates a per-user database (`USER$<NAME>`, from Snowsight Workspaces), which adds privilege rows (with an empty `role` column) to the grant listing. Reading `role` on those rows produced invalid `REVOKE ROLE  FROM user <name>;` SQL that broke reconciliation on any account with per-user databases.
 
 * **Schema inspection** - Ignore temporary schemas ending with _next or _NEXT to prevent intermittent errors when schemas disappear during execution. ([GEM-5](https://linear.app/gemma-analytics/issue/GEM-5), [#11](https://github.com/Gemma-Analytics/permifrost/pull/11))
